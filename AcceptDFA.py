@@ -70,16 +70,14 @@ with open(sys.argv[1]) as f:
                         states.append(state)
                         # if F identifier (by itself or along with S identifier) is found in current line, the state is stored
 
-                        #####if ',F' in lines[index] or ',FS' in lines[index] or ',SF' in lines[index]:
+                        if ',F' in lines[index] or ',FS' in lines[index] or ',SF' in lines[index] or ', F' in lines[index] or ', FS' in lines[index] or ', SF' in lines[index]:
 
-                        if "F" in lines[index]:
                             F.append(state)
                         # if S identifier (by itself or along with F identifier) is found in current line, we check
                         # if initial state has already been set. either an error is thrown or the state is stored
 
-                        #####if ',S' in lines[index] or ',FS' in lines[index] or ',SF' in lines[index]:
+                        if ',S' in lines[index] or ',FS' in lines[index] or ',SF' in lines[index] or ', S' in lines[index] or ', FS' in lines[index] or ', SF' in lines[index]:
 
-                        if "S" in lines[index]:
                             if S != '':
                                 print('Condition error: There can only be one initial state.')
                                 quit()
@@ -100,7 +98,7 @@ with open(sys.argv[1]) as f:
                         # we split the line and store the values in a tuple for additional validation.
                         # if either more than 3 elements are encountered or non-alphanumerical characters
                         # are found, an error is thrown.
-                        currentTransition = tuple([x for x in spl('[,\s+]+', lines[index]) if x])#######
+                        currentTransition = tuple([x for x in spl('[,\s+]+', lines[index]) if x])
                         if len(currentTransition) != 3:
                             print('Format error: Section "Transitions" must contain 3 values for each line.')
                             quit()
@@ -154,10 +152,11 @@ for linie in transitions:
         print("Invalid information: unauthorised transition since either of the elements s1, s2, l is non-existent")
         quit()
 
-
+for linie in T:
+    print (*linie)
+print(F)
 print("This is a well-functioning DFA!\n\n")
 Accept=True # the assumption was False
-
 
 # for debugging:
 """for linie in T:
@@ -171,8 +170,8 @@ Accept=True # the assumption was False
 #print(transitions)
 #print(F, S)
 
-print("Checking if the given word would be accepted by the DFA...\n")
-if Accept==True:
+if Accept==True and len(sys.argv)==3:
+    print("Checking if the given word would be accepted by the DFA...\n")
     current_state=0
     # current_state ==> using this variable to navigate through each state
 
@@ -190,8 +189,7 @@ if Accept==True:
                 break
 
         if stop == True:
-            #print("fantome", word[i+1])
-            print(f"The word {word} was NOT accepted by the machinefsfsfsdf")
+            print(f"The word {word} was NOT accepted by the machine")
             quit()
             break
 
