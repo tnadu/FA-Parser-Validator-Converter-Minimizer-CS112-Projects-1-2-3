@@ -114,7 +114,7 @@ with open(sys.argv[1]) as f:
 
 
 # Function that returns the index of a given element in a list
-def index(element, List=states):
+def getIndex(element, List=states):
     for i in range(len(List)):
         if element == List[i]:
             return i
@@ -147,7 +147,7 @@ if command == 1:
             print(f'\'{transition[2]}\' not a valid state')
             quit()
 
-        state1, letter, state2 = index(transition[0]), transition[1], index(transition[2])
+        state1, letter, state2 = getIndex(transition[0]), transition[1], getIndex(transition[2])
         if letter in T[state1]:  # testing for determinism; we check if current letter is already an element of T[state1]
             print("Condition error: DFA must have unique transition letters for each state")
             quit()
@@ -158,26 +158,26 @@ if command == 1:
 
     if len(sys.argv) == 3:
         print("Checking validity for the given word...")
-    # currentState ==> using this variable to navigate through each state
-    currentState = 0
+        # currentState ==> using this variable to navigate through each state
+        currentState = 0
 
-    for i in range(len(word)):  # each letter of the given word is verified
-        stop = True  # we assume that the word would not pass the verification test
-        for j in range(len(states)):
-            if T[currentState][j] == word[i]:
-                currentState = j
-                stop = False  # we continue the validation since the current letter was correct
+        for i in range(len(word)):  # each letter of the given word is verified
+            stop = True  # we assume that the word would not pass the verification test
+            for j in range(len(states)):
+                if T[currentState][j] == word[i]:
+                    currentState = j
+                    stop = False  # we continue the validation since the current letter was correct
+                    break
+
+            if stop:
+                print(f"The word '{word}' was not accepted by the DFA")
+                quit()
                 break
 
-        if stop:
+        if not stop and currentState in [int(x) for x in F]:  # finally, we check that the final state is a member of F
+            print(f"The word '{word}' was accepted by the DFA!")
+        else:
             print(f"The word '{word}' was not accepted by the DFA")
-            quit()
-            break
-
-    if not stop and currentState in [int(x) for x in F]:  # finally, we check that the final state is a member of F
-        print(f"The word '{word}' was accepted by the DFA!")
-    else:
-        print(f"The word '{word}' was not accepted by the DFA")
 
 
 # NFA menu
@@ -194,7 +194,7 @@ elif command == 2:
             print(f'\'{transition[2]}\' not a valid state')
             quit()
 
-        state1, letter, state2 = index(transition[0]), transition[1], index(transition[2])
+        state1, letter, state2 = getIndex(transition[0]), transition[1], getIndex(transition[2])
         T[state1][state2] = letter
 
     print("Analyzed NFA is valid!")
