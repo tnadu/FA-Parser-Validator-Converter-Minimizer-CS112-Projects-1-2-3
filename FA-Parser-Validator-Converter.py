@@ -119,6 +119,62 @@ def getIndex(element, List=states):
         if element == List[i]:
             return i
 
+def convertToDFA():
+    states1 = [S]
+    newStates = {}
+    transitions1 = {}
+    F1 = [*F]
+
+    notationIndex = 0
+    i = 0
+    while i < len(states1):
+        if type(states1[i]) != set:
+            newStateTransitions = {}
+            for letter in sigma:
+                newState = []
+                finalState = False
+                for i in range(len(states)):
+                    if T[getIndex(states1[i])][i] == letter:
+                        newState.append(sigma[i])  # getState receives index of state and returns state itself
+                        if sigma[i] in F:
+                            finalState = True
+
+                if newState:
+                    if set(newState) not in newStates:
+                        newStates[set(newState)] = f'new_state_{notationIndex}'
+                        notationIndex += 1
+                        if finalState:
+                            F1.append(set(newState))
+                    newStateTransitions[letter] = set(newState)
+                else:
+                    newStateTransitions[letter] = None
+            transitions1[states1[i]] = newStateTransitions
+
+        else:
+            newStateTransitions = {}
+            for letter in sigma:
+                newState = []
+                finalState = False
+                for state in states1[i]:
+                    for i in range(len(states)):
+                        if T[getIndex(state)][i] == letter:
+                            newState.append(sigma[i])  # getState receives index of state and returns state itself
+                            if sigma[i] in F:
+                                finalState = True
+
+                if newState:
+                    if set(newState) not in newStates:
+                        newStates[set(newState)] = f'new_state_{notationIndex}'
+                        notationIndex += 1
+                        if finalState:
+                            F1.append(set(newState))
+                    newStateTransitions[letter] = set(newState)
+                else:
+                    newStateTransitions[letter] = None
+            transitions1[states1[i]] = newStateTransitions
+        i += 1
+
+    return states1, newStates, transitions1, F1
 
 # T-list that stores each 3-tuple in transitions (state1, letter, state2) where T[state1_index][state2_index]=letter
 # initially, each value within it is null
@@ -211,7 +267,8 @@ elif command == 2:
         if command == 0:
             quit()
         elif command == 1:
-            convertToDFA()  # this will be a function
+            states1, newStates, transitions1, F1 = convertToDFA()
+            print(states1, newStates, transitions1, F1, sep='\n')
             quit()
 
     else:
@@ -241,6 +298,8 @@ elif command == 2:
 
         for num in command:
             if num == 1:
-                convertToDFA()  # function
+                states1, newStates, transitions1, F1 = convertToDFA()
+                print(states1, newStates, transitions1, F1, sep='\n')
+                quit()
             elif num == 2:
-        # check word validity
+                pass        # check word validity
