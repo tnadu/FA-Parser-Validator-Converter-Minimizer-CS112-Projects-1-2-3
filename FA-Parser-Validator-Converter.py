@@ -165,7 +165,7 @@ def convertToDFA():
                             if finalState:
                                 F1.append(set(newState))
                         # original NFA state - letter pair is added to current states1 state's transitions
-                        newStateTransitions[letter] = tuple(newState)
+                        newStateTransitions[letter] = newStates[tuple(newState)] #current state's new name is added to newStateTransitions
                 else:  # newState is empty, so current DFA state doesn't transition into any other state
                     newStateTransitions[letter] = None
             transitions1[states1[index]] = newStateTransitions
@@ -208,13 +208,52 @@ def convertToDFA():
                             if finalState:
                                 F1.append(set(newState))
                         # original NFA state - letter pair is added to current states1 state's transitions
-                        newStateTransitions[letter] = tuple(newState)
+                        newStateTransitions[letter] = newStates[tuple(newState)] #current state's new name is added to newStateTransitions
                 else:  # newState is empty, so current DFA state doesn't transition into any other state
                     newStateTransitions[letter] = None
             transitions1[states1[index]] = newStateTransitions
         index += 1
 
     return states1, newStates, transitions1, F1
+
+#function that prints the converted DFA
+def DFAdisplay():
+    #SIGMA
+    print("Sigma:")
+    for i in range(len(sigma)):
+        print(f"\t{sigma[i]}")
+    print("End\n")
+
+    #STATES
+    print("States:")
+    for i in range(len(states1)):
+        if type(states1[i]) != tuple:
+            print(f"\t{states1[i]}", end="")
+        else:
+            print(f"\t{newStates[states1[i]]}", end="")
+        #the first index indicates the first state of the DFA
+        if i==0:
+            print(f", S", end="")
+        #checking if the current state is final
+        if set(states1[i]) in F1 or states1[i] in F1:
+            print(f", F", end="")
+        print()
+    print("End:")
+
+    #TRANSITIONS
+    print("Transitions:")
+    for state in transitions1:
+        for letter in transitions1[state]:
+            if transitions1[state][letter]!=None:
+                if type(state)!=tuple:
+                    print(f"\t{state}, {letter}, {transitions1[state][letter]}")
+                else:
+                    state2=transitions1[state][letter]
+                    state1=newStates[state] #current state's new name will be displayed
+                    print(f"\t{state1}, {letter}, {state2}")
+
+        
+    print("End")
 
 
 # T-list that stores each 3-tuple in transitions (state1, letter, state2) where T[state1_index][state2_index]=letter
@@ -310,7 +349,8 @@ elif command == 2:
             quit()
         elif command == 1:
             states1, newStates, transitions1, F1 = convertToDFA()
-            print(states1, newStates, transitions1, F1, sep='\n')
+            DFAdisplay()
+
             quit()
 
     # word received for validation
@@ -342,7 +382,8 @@ elif command == 2:
         for num in command:
             if num == 1:
                 states1, newStates, transitions1, F1 = convertToDFA()
-                print(states1, newStates, transitions1, F1, sep='\n')
+                DFAdisplay()
+
                 quit()
             elif num == 2:
                 pass  # check word validity
