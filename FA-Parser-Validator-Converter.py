@@ -165,7 +165,7 @@ def convertToDFA():
                             if finalState:
                                 F1.append(set(newState))
                         # original NFA state - letter pair is added to current states1 state's transitions
-                        newStateTransitions[letter] = newStates[tuple(newState)] #current state's new name is added to newStateTransitions
+                        newStateTransitions[letter] = newStates[tuple(newState)]  # current state's new name is added to newStateTransitions
                 else:  # newState is empty, so current DFA state doesn't transition into any other state
                     newStateTransitions[letter] = None
             transitions1[states1[index]] = newStateTransitions
@@ -208,7 +208,7 @@ def convertToDFA():
                             if finalState:
                                 F1.append(set(newState))
                         # original NFA state - letter pair is added to current states1 state's transitions
-                        newStateTransitions[letter] = newStates[tuple(newState)] #current state's new name is added to newStateTransitions
+                        newStateTransitions[letter] = newStates[tuple(newState)]  # current state's new name is added to newStateTransitions
                 else:  # newState is empty, so current DFA state doesn't transition into any other state
                     newStateTransitions[letter] = None
             transitions1[states1[index]] = newStateTransitions
@@ -216,43 +216,44 @@ def convertToDFA():
 
     return states1, newStates, transitions1, F1
 
-#function that prints the converted DFA
-def DFAdisplay():
-    #SIGMA
+
+# function which prints the converted DFA
+def printDFA():
     print("Sigma:")
     for i in range(len(sigma)):
         print(f"\t{sigma[i]}")
     print("End\n#")
 
-    #STATES
     print("States:")
     for i in range(len(states1)):
+        # current state is an original state
         if type(states1[i]) != tuple:
             print(f"\t{states1[i]}", end="")
+        # current state is newly generated
         else:
             print(f"\t{newStates[states1[i]]}", end="")
-        #the first index indicates the first state of the DFA
-        if i==0:
+
+        if i == 0:  # the first state of the DFA
             print(f", S", end="")
-        #checking if the current state is final
-        if set(states1[i]) in F1 or states1[i] in F1:
+
+        if set(states1[i]) in F1 or states1[i] in F1:  # checking if the current state is final
             print(f", F", end="")
         print()
     print("End\n#")
 
-    #TRANSITIONS
     print("Transitions:")
     for state in transitions1:
         for letter in transitions1[state]:
-            if transitions1[state][letter]!=None:
-                if type(state)!=tuple:
+            if transitions1[state][letter]:
+                # current state is an original state
+                if type(state) != tuple:
                     print(f"\t{state}, {letter}, {transitions1[state][letter]}")
+                # current state is newly generated
                 else:
-                    state2=transitions1[state][letter]
-                    state1=newStates[state] #current state's new name will be displayed
+                    state2 = transitions1[state][letter]
+                    state1 = newStates[state]  # current state's new name will be displayed
                     print(f"\t{state1}, {letter}, {state2}")
 
-        
     print("End")
 
 
@@ -349,7 +350,7 @@ elif command == 2:
             quit()
         elif command == 1:
             states1, newStates, transitions1, F1 = convertToDFA()
-            DFAdisplay()
+            printDFA()
 
             quit()
 
@@ -380,10 +381,30 @@ elif command == 2:
             quit()
 
         for num in command:
-            if num == 1:
+            if num == 1:  # convert NFA to DFA
                 states1, newStates, transitions1, F1 = convertToDFA()
-                DFAdisplay()
+                printDFA()
 
                 quit()
-            elif num == 2:
-                pass  # check word validity
+            elif num == 2:  # NFA word acceptance
+                print("Checking validity for the given word...")
+                queue = [S]
+                valid = True
+                queueIndex = 0
+
+                while queueIndex < len(word) and valid and queue:
+                    nextStates = []
+                    if word[queueIndex] not in sigma:
+                        valid = False
+                    else:
+                        for current_state in queue:
+                            for state in states:
+                                if word[queueIndex] in T[getIndex(current_state)][getIndex(state)]:
+                                    nextStates.append(state)
+                    queue = nextStates
+                    queueIndex += 1
+
+                if valid and set(F).intersection(set(queue)):
+                    print(f"The word '{word}' was accepted by the NFA!")
+                else:
+                    print(f"The word '{word}' was not accepted by the NFA")
