@@ -222,7 +222,7 @@ def DFAdisplay():
     print("Sigma:")
     for i in range(len(sigma)):
         print(f"\t{sigma[i]}")
-    print("End\n")
+    print("End\n#")
 
     #STATES
     print("States:")
@@ -238,7 +238,7 @@ def DFAdisplay():
         if set(states1[i]) in F1 or states1[i] in F1:
             print(f", F", end="")
         print()
-    print("End:")
+    print("End\n#")
 
     #TRANSITIONS
     print("Transitions:")
