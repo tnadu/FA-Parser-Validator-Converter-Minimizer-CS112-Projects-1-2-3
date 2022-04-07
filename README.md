@@ -15,6 +15,13 @@ choosing to test acceptance of an NFA - loaded from an NFA config file.
 __Exercise 3.__ Implement a library/program in a programming language of your
 choosing to convert an NFA - loaded from an NFA config file, to a DFA.
 
+# CS112 Project 3 - DFA minimizer
+__Exercise 1.__ Implement a library/program in a programming language of your
+choosing to simulate the Myhill-Nerode theorem - minimize a DFA to the
+smallest DFA with the same level of completeness.
+
+__Exercise 2.__
+
 
 
 ## Contributor's usernames:
