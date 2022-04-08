@@ -387,9 +387,27 @@ if command == 1:
 
     print("Analyzed DFA is valid!")
 
-    if len(sys.argv) == 3:
+    # no word received for validation
+    if len(sys.argv)==2:
+        print('Would you like to minimize the current DFA?')
+        print('Type \'1\' for \'yes\' or \'0\' for \'no\'')
+        command = int(input('>>> '))
+
+        while command > 1 or command < 0:
+            print(f'Error: \'{command}\' not a valid option')
+            command = int(input('>>> '))
+
+        if command == 0:
+            quit()
+        elif command == 1:
+            MinimizeDFA()
+            #DFAdisplay()###########
+            quit()
+
+    # word received for validation
+    else:
         print('Type \'0\' to quit or select one or both of the following options: ')
-        print('1) simulate the Myhill-Nerode theorem - minimize a DFA to the smallest DFA with the same level of completeness')
+        print('1) minimize DFA')
         print('2) check word validity')
         command = [int(x) for x in input('>>> ').split()]
         check = True
@@ -417,7 +435,7 @@ if command == 1:
                 MinimizeDFA()######
                 #DFAdisplay()
 
-            
+
             elif num == 2:
                 print("Checking validity for the given word...")
                 # currentState ==> using this variable to navigate through each state
@@ -441,23 +459,6 @@ if command == 1:
                 else:
                     print(f"The word '{word}' was not accepted by the DFA")
 
-    # no word received for validation
-    else:
-        print('Would you like to simulate the Myhill-Nerode theorem - minimize a DFA to the smallest DFA with the same level of completeness?')
-        print('Type \'1\' for \'yes\' or \'0\' for \'no\'')
-        command = int(input('>>> '))
-
-        while command > 1 or command < 0:
-            print(f'Error: \'{command}\' not a valid option')
-            command = int(input('>>> '))
-
-        if command == 0:
-            quit()
-        elif command == 1:
-            MinimizeDFA()
-            #DFAdisplay()###########
-
-            quit()
 
 # NFA menu
 elif command == 2:
@@ -493,7 +494,6 @@ elif command == 2:
         elif command == 1:
             states1, newStates, transitions1, F1 = convertToDFA()
             DFAdisplay()
-
             quit()
 
     # word received for validation
