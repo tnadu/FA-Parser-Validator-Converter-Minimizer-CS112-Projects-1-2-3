@@ -137,7 +137,7 @@ def convertToDFA():
                 newState = []  # that the current state transitions into
                 finalState = False  # bool variable to check whether newState contains an original final state
                 for i in range(len(states)):
-                    if T[getIndex(states1[index])][i] == letter:
+                    if letter in T[getIndex(states1[index])][i]:
                         newState.append(states[i])
                         if states[i] in F:  # newState contains an original final state
                             finalState = True
@@ -179,7 +179,7 @@ def convertToDFA():
                 # all component states' transitioned states will be added to newState
                 for state in states1[index]:
                     for i in range(len(states)):
-                        if T[getIndex(state)][i] == letter:
+                        if letter in T[getIndex(state)][i]:
                             if states[i] not in newState:
                                 newState.append(states[i])
                             if states[i] in F:  # newState contains an original final state
@@ -257,101 +257,102 @@ def printDFA():
     print("End")
 
 
-def MinimizeDFA():
-    # transitions3 contains the path each state is following within the DFA through each letter of sigma
-    # transitions3 = {q0:{letter0:qi, letter1:qj...}, q1:{...}, ...}
-    transitions3 = {}
-    for state in states:
-        transitions3[state] = {}
-        for letter in sigma:
-            for state1 in states:
-                if T[getIndex(state)][getIndex(state1)] == letter:
-                    transitions3[state][letter] = state1
-                    break
-    # states0 contains tuples of equivalent states - that will be merged in order to create a new general state
-    states0 = []
+# def MinimizeDFA():
+#     # transitions3 contains the path each state is following within the DFA through each letter of sigma
+#     # transitions3 = {q0:{letter0:qi, letter1:qj...}, q1:{...}, ...}
+#     transitions3 = {}
+#     for state in states:
+#         transitions3[state] = {}
+#         for letter in sigma:
+#             for state1 in states:
+#                 if letter in T[getIndex(state)][getIndex(state1)]:
+#                     transitions3[state][letter] = state1
+#                     break
+#     # states0 contains tuples of equivalent states - that will be merged in order to create a new general state
+#     states0 = []
+#
+#     # T1 - tool used to collect tuples of equivalent states
+#     # T1[i][j]={0, if both state[i] and state[j] are either final states or simple states
+#     #           1, if state[i] and state[j] are different on this matter}
+#
+#     T1 = [[NULL for i in range(len(states))] for i in range(len(states))]
+#     for i in range(len(states)):
+#         for j in range(i):
+#             if (states[i] in F and states[j] in F) or (states[i] not in F and states[j] not in F):
+#                 T1[i][j] = T1[j][i] = 0
+#                 states0.append((states[i], states[j]))
+#             else:
+#                 T1[i][j] = T1[j][i] = 1
+#     # checking if all tuples in states0 are prone to be merged into a new state
+#     verify = 0
+#     while not verify:
+#         verify = 1
+#         for state in states0:
+#             for letter in sigma:
+#                 if verify:
+#                     if transitions3[state[0]].get(letter, NULL) != NULL:
+#                         # the corresponding index of state[0] within array T1
+#                         index1 = getIndex(transitions3[state[0]][letter])
+#
+#                         if transitions3[state[1]].get(letter, NULL) != NULL:
+#                             # the corresponding index of state[1] within array T1
+#                             index2 = getIndex(transitions3[state[1]][letter])
+#
+#                             if T1[index1][index2] == 1 or T1[index2][index1] == 1:
+#                                 # the tuple cannot be merged, hence it is removed from states0
+#                                 verify = 0
+#                                 T1[getIndex(state[0])][getIndex(state[1])] = T1[getIndex(state[1])][getIndex(state[0])] = 1
+#                                 states0.remove(state)
+#                                 break
+#     clasa = {}
+#     index = 0
+#     for pair in states0:
+#         # verific daca are vreun element comun cu o clasa de echivalenta
+#         added = False
+#         for element in pair:
+#             if added == False:
+#                 for key in clasa.keys():
+#                     if element in clasa[key]:
+#                         clasa[key].add(pair[0])
+#                         clasa[key].add(pair[1])
+#                         added = True
+#         # daca nu l-am adaugat in dictionar,creez o noua clasa de echivaenta
+#         if added == False:
+#             index += 1
+#             clasa[f'new_state_{index}'] = set(pair)
+#     '''
+#     #dupa ce am creeat noile stari(clasele de echivalenta)
+#     #le updatez in lista states, care contine starile initiale
+#     cum fac asta? sterg starile care au fost "comprimate" in dictionarul clasa
+#     '''
+#
+#     # elimin starile care au fost comprimate
+#     finalstates = []
+#     for state in states:
+#         found = 0
+#         for key in clasa.keys():
+#             if state in clasa[key]:
+#                 found = 1
+#                 break
+#         if found == 0:
+#             finalstates.append(state)
+#             clasa[state] = state
+#     # adaug starile noi, adica clasele de echivalenta
+#     for key in clasa.keys():
+#         finalstates.append(key)
+#
+#     print(finalstates)
+#     print(clasa)
+#
+#     return finalstates, clasa
 
-    # T1 - tool used to collect tuples of equivalent states
-    # T1[i][j]={0, if both state[i] and state[j] are either final states or simple states
-    #           1, if state[i] and state[j] are different on this matter}
-
-    T1 = [[NULL for i in range(len(states))] for i in range(len(states))]
-    for i in range(len(states)):
-        for j in range(i):
-            if (states[i] in F and states[j] in F) or (states[i] not in F and states[j] not in F):
-                T1[i][j] = T1[j][i] = 0
-                states0.append((states[i], states[j]))
-            else:
-                T1[i][j] = T1[j][i] = 1
-    # checking if all tuples in states0 are prone to be merged into a new state
-    verify = 0
-    while not verify:
-        verify = 1
-        for state in states0:
-            for letter in sigma:
-                if verify:
-                    if transitions3[state[0]].get(letter, NULL) != NULL:
-                        # the corresponding index of state[0] within array T1
-                        index1 = getIndex(transitions3[state[0]][letter])
-
-                        if transitions3[state[1]].get(letter, NULL) != NULL:
-                            # the corresponding index of state[1] within array T1
-                            index2 = getIndex(transitions3[state[1]][letter])
-
-                            if T1[index1][index2] == 1 or T1[index2][index1] == 1:
-                                # the tuple cannot be merged, hence it is removed from states0
-                                verify = 0
-                                T1[getIndex(state[0])][getIndex(state[1])] = T1[getIndex(state[1])][getIndex(state[0])] = 1
-                                states0.remove(state)
-                                break
-    clasa = {}
-    index = 0
-    for pair in states0:
-        # verific daca are vreun element comun cu o clasa de echivalenta
-        added = False
-        for element in pair:
-            if added == False:
-                for key in clasa.keys():
-                    if element in clasa[key]:
-                        clasa[key].add(pair[0])
-                        clasa[key].add(pair[1])
-                        added = True
-        # daca nu l-am adaugat in dictionar,creez o noua clasa de echivaenta
-        if added == False:
-            index += 1
-            clasa[f'new_state_{index}'] = set(pair)
-    '''
-    #dupa ce am creeat noile stari(clasele de echivalenta)
-    #le updatez in lista states, care contine starile initiale
-    cum fac asta? sterg starile care au fost "comprimate" in dictionarul clasa
-    '''
-
-    # elimin starile care au fost comprimate
-    finalstates = []
-    for state in states:
-        found = 0
-        for key in clasa.keys():
-            if state in clasa[key]:
-                found = 1
-                break
-        if found == 0:
-            finalstates.append(state)
-            clasa[state] = state
-    # adaug starile noi, adica clasele de echivalenta
-    for key in clasa.keys():
-        finalstates.append(key)
-
-    print(finalstates)
-    print(clasa)
-
-    return finalstates, clasa
 
 
 
 
 # T-list that stores each 3-tuple in transitions (state1, letter, state2) where T[state1_index][state2_index]=letter
 # initially, each value within it is null
-T = [["null" for i in range(len(states))] for i in range(len(states))]
+T = [[[] for i in range(len(states))] for i in range(len(states))]
 
 print('Select the type of finite automaton:')
 print('1) deterministic')
@@ -377,11 +378,12 @@ if command == 1:
             quit()
 
         state1, letter, state2 = getIndex(transition[0]), transition[1], getIndex(transition[2])
-        if letter in T[state1]:  # testing for determinism; we check if current letter is already an element of T[state1]
-            print("Condition error: DFA must have unique transition letters for each state")
-            quit()
+        for letters in T[state1]:
+            if letter in letters:  # testing for determinism; we check if current letter is already an element of T[state1]
+                print("Condition error: DFA must have unique transition letters for each state")
+                quit()
         else:  # registers the current tuple
-            T[state1][state2] = letter
+            T[state1][state2].append(letter)
 
     print("Analyzed DFA is valid!")
 
@@ -393,7 +395,7 @@ if command == 1:
         for i in range(len(word)):  # each letter of the given word is verified
             stop = True  # we assume that the word would not pass the verification test
             for j in range(len(states)):
-                if T[currentState][j] == word[i]:
+                if word[i] in T[currentState][j]:
                     currentState = j
                     stop = False  # we continue the validation since the current letter was correct
                     break
@@ -424,7 +426,7 @@ elif command == 2:
             quit()
 
         state1, letter, state2 = getIndex(transition[0]), transition[1], getIndex(transition[2])
-        T[state1][state2] = letter
+        T[state1][state2].append(letter)
 
     print("Analyzed NFA is valid!")
 
