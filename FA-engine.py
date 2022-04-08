@@ -113,7 +113,7 @@ with open(sys.argv[1]) as f:
             index += 1
 
 
-# Function that returns the index of a given element in a list
+
 def getIndex(element):
     for i in range(len(states)):
         if element == states[i]:
@@ -217,7 +217,6 @@ def convertToDFA():
     return states1, newStates, transitions1, F1
 
 
-# function which prints the converted DFA
 def printConvertedDFA():
     print("Sigma:")
     for i in range(len(sigma)):
@@ -255,8 +254,6 @@ def printConvertedDFA():
                     print(f"\t{state1}, {letter}, {state2}")
 
     print("End")
-    
-    
 
 
 def minimizeDFA():
@@ -280,14 +277,17 @@ def minimizeDFA():
     for i in range(len(states)):
         for j in range(i):
             if (states[i] in F and states[j] in F) or (states[i] not in F and states[j] not in F):
-                # markings[i][j] = markings[j][i] = 0
                 markings[i][j] = 0
                 newStates.append([states[i], states[j]])
             else:
                 markings[i][j] = 1
-                # markings[i][j] = markings[j][i] = 1
 
-
+    # for marking in markings:
+    #     print(*marking)
+    #     print()
+    #
+    # print(newStates)
+    # print()
 
     # checking if all tuples in newStates are prone to be merged into a new state
     verify = False
@@ -296,44 +296,50 @@ def minimizeDFA():
         verify = True
         for newState in newStates:  # verifying every tuple whose marking is still 0
             # we check every letter in sigma, as long as the marking hasn't been modified to 1 (thus verify no longer being true)
-            for letter in sigma and verify:
-                # current letter transitions first state from newState (newState[0]) tuple into another state
-                if letter in transitions1[newState[0]].keys() and verify:
-                    # the corresponding index of state[0] within matrix markings
-                    index0 = getIndex(transitions1[newState[0]][letter])
+            for letter in sigma:
+                if verify:
+                    # current letter transitions first state from newState (newState[0]) tuple into another state
+                    if letter in transitions1[newState[0]].keys():
+                        # the corresponding index of state[0] within matrix markings
+                        index0 = getIndex(transitions1[newState[0]][letter])
 
-                    # current letter transitions second state from newState (newState[1]) tuple into another state
-                    if letter in transitions1[newState[1]].keys():
-                        # the corresponding index of state[1] within matrix markings
-                        index1 = getIndex(transitions1[newState[1]][letter])
+                        # current letter transitions second state from newState (newState[1]) tuple into another state
+                        if letter in transitions1[newState[1]].keys():
+                            # the corresponding index of state[1] within matrix markings
+                            index1 = getIndex(transitions1[newState[1]][letter])
 
-                        # the tuple cannot be merged, hence it is removed from newStates
-                        if markings[index0][index1] == 1 or markings[index1][index0] == 1:
-                            verify = False
-                            markings[getIndex(newState[0])][getIndex(newState[1])]
-                            # markings[getIndex(newState[0])][getIndex(newState[1])] = markings[getIndex(newState[1])][getIndex(newState[0])] = 1
-                            newStates.remove(newState)
-                            break
+                            # the tuple cannot be merged, hence it is removed from newStates
+                            if markings[index0][index1] == 1 or markings[index1][index0] == 1:
+                                verify = False
+                                markings[getIndex(newState[0])][getIndex(newState[1])] = 1
+                                newStates.remove(newState)
+                                break
 
 
+    # print(newStates)
+    # print()
 
     finalStatesNames = {}  # compressed final states will be added here
     index = 0
     for pair in newStates:  # checking all tuples that have passed the marking verification
         # checking if pair has common elements with a finalState
         added = False
-        for element in pair and not added:
-            for finalState in finalStatesNames:
-                if element in finalState:
-                    finalState.add(pair[0])
-                    finalState.add(pair[1])
-                    added = True
-                    break
+        for element in pair:
+            if not added:
+                for finalStateName in finalStatesNames:
+                    if element in finalStatesNames[finalStateName]:
+                        finalStatesNames[finalStateName].add(pair[0])
+                        finalStatesNames[finalStateName].add(pair[1])
+                        added = True
+                        break
+            else:
+                break
         # if pair was found not to have any common elements with any of the final states,
         # a new final state will be created
         if not added:
             finalStatesNames[f'newState{index}'] = set(pair)
             index += 1
+
 
     # after creating the new states, we check if there are any old states
     # remaining which haven't been contained in any of the new ones.
@@ -342,46 +348,77 @@ def minimizeDFA():
         found = False
         # checking if 'state' is part of any new state
         for finalState in finalStatesNames:
-            if state in finalState:
+            if state in finalStatesNames[finalState]:
                 found = True
                 break
         # if it hasn't been found, we add it to both finalStates and finalStatesNames
         if not found:
             finalStates.append(state)
-            finalStatesNames[state] = state
+            finalStatesNames[state] = {state}
     # adding the new states in finalStates
-    for key in finalStatesNames.keys():
-        finalStates.append(key)
+    for finalState in finalStatesNames:
+        if finalState not in finalStates:
+            finalStates.append(finalState)
 
-
+    # print(finalStatesNames)
+    # print()
+    # print(finalStates)
 
     transitionSets = {}  # will be used to store the states each final state transitions into, as sets
     S1 = ''  # new start state
     F1 = []  # new final states
-    for key in finalStatesNames.keys():  # iterating through the final states
-        transitionSets[finalStatesNames[key]] = {}
+    for finalStateName in finalStatesNames:  # iterating through the final states
+        transitionSets[finalStateName] = {}
 
-        if set(finalStatesNames[key]).intersection(F):
-            F1.append(key)  # finalStatesNames[key] is a new final state
-        if S1 == '' and S in finalStatesNames[key]:
-            S1 = key  # finalStatesNames[key] is the new start state
+        if set(finalStatesNames[finalStateName]).intersection(F):
+            F1.append(finalStateName)  # finalStatesNames[key] is a new final state
+        if S1 == '' and S in finalStatesNames[finalStateName]:
+            S1 = finalStateName  # finalStatesNames[key] is the new start state
 
         for letter in sigma:  # for every letter, the set of transitioned states from the states in finalStatesNames[key] is found
-            transitionSets[finalStatesNames[key]][letter] = set()
-            for state in finalStatesNames[key]:
-                transitionSets[finalStatesNames[key]][letter].add(transitions1[state][letter])
+            transitionSets[finalStateName][letter] = set()
+            for state in finalStatesNames[finalStateName]:
+                transitionSets[finalStateName][letter].add(transitions1[state][letter])
 
     finalTransitions = {}
     for finalState in finalStates:
         finalTransitions[finalState] = {}
         for letter in sigma:
-            for key in finalStatesNames.keys():
-                if finalStatesNames[finalState][letter].intersection(finalStatesNames[key]):
-                    finalTransitions[finalState][letter] = key
+            for finalStateName in finalStatesNames:
+                if transitionSets[finalState][letter].intersection(finalStatesNames[finalStateName]):
+                    finalTransitions[finalState][letter] = finalStateName
                     break
+
+    # print()
+    # print(finalTransitions)
 
     return finalStates, finalTransitions, S1, F1
 
+
+def printMinimizedDFA():
+    print("Sigma:")
+    for i in range(len(sigma)):
+        print(f"\t{sigma[i]}")
+    print("End\n#")
+
+    print("States:")
+    for state in finalStates:
+        print(f"\t{state}", end="")
+
+        if state == S1:
+            print(f", S", end="")
+
+        if state in F1:
+            print(f", F", end="")
+        print()
+    print("End\n#")
+
+    print("Transitions:")
+    for state in finalTransitions:
+        for letter in finalTransitions[state]:
+            if finalTransitions[state][letter]:
+                print(f"\t{state}, {letter}, {finalTransitions[state][letter]}")
+    print("End")
 
 
 
@@ -420,7 +457,7 @@ if command == 1:
         else:  # registers the current tuple
             T[state1][state2].append(letter)
 
-    print("Analyzed DFA is valid!")
+    print("Analyzed DFA is valid!\n")
 
     # no word received for validation
     if len(sys.argv) == 2:
@@ -435,9 +472,22 @@ if command == 1:
         if command == 0:
             quit()
         elif command == 1:
-            finalStates, finalTransitions, S1, F1 = minimizeDFA()  
-            # DFAdisplay()###########
-            quit()
+            print('Is the stored DFA complete?')
+            print('Type \'1\' for \'yes\' or \'0\' for \'no\'')
+            command = int(input('>>> '))
+
+            while command > 1 or command < 0:
+                print(f'Error: \'{command}\' not a valid option')
+                command = int(input('>>> '))
+
+            if command == 0:
+                print('Algorithm only works for complete DFAs!')
+                quit()
+            elif command == 1:
+                finalStates, finalTransitions, S1, F1 = minimizeDFA()
+                print()
+                printMinimizedDFA()
+                quit()
 
     # word received for validation
     else:
@@ -450,7 +500,7 @@ if command == 1:
         # command input format checking
         while check:
             check = False
-            if len(command) > 3:
+            if len(command) > 2:
                 print('Error: Too many options')
                 command = [int(x) for x in input('>>> ').split()]
                 check = True
@@ -467,9 +517,21 @@ if command == 1:
 
         for num in command:
             if num == 1:
-                finalStates, finalTransitions, S1, F1 = minimizeDFA()  
-                # DFAdisplay()
+                print('Is the stored DFA complete?')
+                print('Type \'1\' for \'yes\' or \'0\' for \'no\'')
+                option = int(input('>>> '))
 
+                while option > 1 or option < 0:
+                    print(f'Error: \'{option}\' not a valid option')
+                    option = int(input('>>> '))
+
+                if option == 0:
+                    print('Algorithm only works for complete DFAs!\n')
+                elif option == 1:
+                    finalStates, finalTransitions, S1, F1 = minimizeDFA()
+                    print()
+                    printMinimizedDFA()
+                    print()
 
             elif num == 2:
                 print("Checking validity for the given word...")
@@ -485,8 +547,6 @@ if command == 1:
                             break
 
                     if stop:
-                        print(f"The word '{word}' was not accepted by the DFA")
-                        quit()
                         break
 
                 if not stop and currentState in [int(x) for x in F]:  # finally, we check that the final state is a member of F
@@ -512,7 +572,7 @@ elif command == 2:
         state1, letter, state2 = getIndex(transition[0]), transition[1], getIndex(transition[2])
         T[state1][state2].append(letter)
 
-    print("Analyzed NFA is valid!")
+    print("Analyzed NFA is valid!\n")
 
     # no word received for validation
     if len(sys.argv) == 2:
@@ -528,8 +588,8 @@ elif command == 2:
             quit()
         elif command == 1:
             states1, newStates, transitions1, F1 = convertToDFA()
+            print()
             printConvertedDFA()
-
             quit()
 
     # word received for validation
@@ -543,7 +603,7 @@ elif command == 2:
         # command input format checking
         while check:
             check = False
-            if len(command) > 3:
+            if len(command) > 2:
                 print('Error: Too many options')
                 command = [int(x) for x in input('>>> ').split()]
                 check = True
@@ -561,9 +621,10 @@ elif command == 2:
         for num in command:
             if num == 1:  # convert NFA to DFA
                 states1, newStates, transitions1, F1 = convertToDFA()
+                print()
                 printConvertedDFA()
+                print()
 
-                quit()
             elif num == 2:  # NFA word acceptance
                 print("Checking validity for the given word...")
                 queue = [S]
